@@ -1,0 +1,13 @@
+body {
+  background-color: rgb(255, 143, 161);
+  color: white;
+}
+
+.headerColor {
+  background-color: rgb(255, 99, 151);
+}
+
+.card {
+  border-color: white;
+  background-color: rgb(255, 99, 151);
+}
