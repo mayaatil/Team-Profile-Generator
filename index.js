@@ -1,165 +1,153 @@
 //require necessary files
 const fs = require("fs");
 const inquirer = require("inquirer");
-const Employee = require("./lib/employee");
-const Engineer = require("./lib/engineer");
-const Intern = require("./lib/intern");
-const Manager = require("./lib/manager");
+const Engineer = require("./lib/Engineer");
+const Intern = require("./lib/Intern");
+const Manager = require("./lib/Manager");
+const Employee = require("./lib/Employee");
 
 //create empty array for employee data to be pushed into
-let employeeData = [];
+const teamMembers = [];
 
 //create inquirer prompts for employee data
-function createTeamRoster() {
-  let questions = [
-    {
-      type: "input",
-      name: "manager",
-      message: "Please enter the first and last name of the team manager",
-    },
-    {
-      type: "input",
-      name: "managerID",
-      message: "Please enter the ID of the team manager",
-    },
-    {
-      type: "input",
-      name: "managerEmail",
-      message: "Please enter the email address of the team manager",
-    },
-    {
-      type: "input",
-      name: "office",
-      message: "Please enter the office number of the team manager",
-    },
-    {
-      type: "checkbox",
-      name: "title",
-      message: "What is the job title of the employee you would like to add?",
-      choices: ["Engineer", "Intern"],
-    },
-    {
-      type: "input",
-      name: "employee",
-      message: "Please enter the first and last name of the employee",
-    },
-    {
-      type: "input",
-      name: "employeeID",
-      message: "Please enter the ID of the employee",
-    },
-    {
-      type: "input",
-      name: "employeeEmail",
-      message: "Please enter the email address of the employee",
-    },
-    //use when to display which questions will be asked depending on user input of Engineer or Intern
-    {
-      type: "input",
-      name: "github",
-      when: (employeeInput) => employeeInput.title === "Engineer",
-      message: "Please enter the Github username of the employee",
-    },
-    {
-      type: "input",
-      name: "school",
-      when: (employeeInput) => employeeInput.title === "Intern",
-      message: "Please enter the school of the employee",
-    },
-  ];
-  //return back to main menu and utilize employee input
-  return inquirer.prompt(questions).then((employeeInput) => {
-    let addTeamManager = new Manager(
-      employeeInput.manager,
-      employeeInput.managerID,
-      employeeInput.managerEmail,
-      employeeInput.office,
-      employeeInput.title
-    );
-    employeeData.push(addTeamManager);
+function addEmployee() {
+  inquirer
+    .prompt([
+      {
+        //use LIST instead of CHECKBOX to prompt the (when) function. note: tried checkbox and it dind't work
+        type: "list",
+        name: "title",
+        message: "What is the job title of the employee you would like to add?",
+        choices: ["Manager", "Engineer", "Intern", "Finished"],
+      },
+      {
+        type: "input",
+        name: "name",
+        when: (response) => response.title !== "Finished",
+        message: "Please enter the name of the employee",
+      },
+      {
+        type: "input",
+        name: "employeeID",
+        when: (response) => response.title !== "Finished",
+        message: "Please enter the employee ID",
+      },
+      {
+        type: "input",
+        name: "email",
+        when: (response) => response.title !== "Finished",
+        message: "Please enter the email address of the employee",
+      },
+      //use when to display which questions will be asked depending on user input of Engineer, Intern, or Manager
+      {
+        type: "input",
+        name: "officeNumber",
+        when: (response) => response.title === "Manager",
+        message: "Please enter the office number of the team manager",
+      },
+      {
+        type: "input",
+        name: "github",
+        when: (response) => response.title === "Engineer",
+        message: "Please enter the Github username of the employee",
+      },
+      {
+        type: "input",
+        name: "school",
+        when: (response) => response.title === "Intern",
+        message: "Please enter the name of the school the employee attends",
+      },
+    ])
+    .then((response) => {
+      //create if statements for each employee added
+      if (response.title === "Manager") {
+        const manager = new Manager(
+          response.name,
+          response.employeeID,
+          response.email,
+          response.officeNumber
+        );
+        teamMembers.push(manager);
+        addEmployee();
 
-    //push employee to array (engineer)
-    let addEngineer = new Engineer(
-      employeeInput.employee,
-      employeeInput.employeeID,
-      employeeInput.employeeEmail,
-      employeeInput.github
-    );
-    employeeData.push(addEngineer);
+        //call inquirer prompts to add employee if this is chosen
+      } else if (response.title === "Engineer") {
+        const engineer = new Engineer(
+          response.name,
+          response.employeeID,
+          response.email,
+          response.github
+        );
+        teamMembers.push(engineer);
 
-    //push employee to array (intern)
-    let addIntern = new Intern(
-      employeeInput.employee,
-      employeeInput.employeeID,
-      employeeInput.employeeEmail,
-      employeeInput.school
-    );
-    employeeData.push(addIntern);
-    console.log(employeeData);
-  });
+        addEmployee();
+        //call inquirer prompts to add employee if this is chosen
+      } else if (response.title === "Intern") {
+        const intern = new Intern(
+          response.name,
+          response.employeeID,
+          response.email,
+          response.school
+        );
+        teamMembers.push(intern);
+
+        addEmployee();
+      } else if (response.title === "Finished") {
+        createFile();
+      }
+    });
+  //create end to loop, whether or not the user wants to add or stop
 }
+addEmployee();
 
-//add cards for each intern or engineer added.
-function createEachMember(employeeData) {
-  teamMembers.forEach((teamMember) => {
-    typeTeamMember += `<div class="card">
-        <h1>${employeeData.employee}</h1>
-        <div id="title"></div>
-        <div>Employee ID: ${employeeData.employeeID}</div>
-        <div>Employee Email: ${employeeData.employeeEmail} </div>
-        <div id="additional"></div>
-        </div>`;
-  });
+//create the strucutre of the html and pass through the teamMembers array. include cardstructure as well.
+const createFile = (teamMembers) => {
+  let fileStructure = `<!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta http-equiv="X-UA-Compatible" content="IE=edge">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <link rel="stylesheet" href="./style.css" />
+          <title>Team Profile Generator</title>
+      </head>
+      <header>My team</header>
+      <body>
+      <section>
+          <div>${createCard(teamMembers)}</div>
+          </section>
+      </body>
+      </html>`;
 
+  fs.writeFile("index.html", fileStructure, (err) =>
+    err ? console.error(err) : console.log("File added!")
+  );
+};
+
+function runTest(teamMembers) {
   //use if statement to fill in div according to user input
-  if (employeeInput.title === "Engineer") {
-    $("#title").textContent = "Engineer";
-    $(
-      "#additional"
-    ).textContent = `"https://github.com/${employeeData.github}"`;
+  if (teamMembers.title === "Engineer") {
+    return `<div>"https://github.com/${teamMembers.github}"</div>`;
   } else {
-    $("#title").textContent("Intern");
-    $("#additional").textContent = `"https://github.com/${school}"`;
+    teamMembers.title === "Intern";
+    return `<div>"I attend ${teamMembers.school}"</div>`;
   }
 }
 
-//create structure of html and include card
-function showTeamRoster(employeeData, typeTeamMember) {
-  `<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="./style.css" />
-        <title>Team Profile Generator</title>
-    </head>
-    <header class="headerColor">My team</header>
-    <body>
-    <section>
-        <div class="card">
-        <h1>${employeeData.manager}</h1>
-        <p>Team Manager</P>
-        <div>ID: ${employeeData.managerID}</div>
-        <div>Email: ${employeeData.managerEmail}</div>
-        <div>Office: ${employeeData.office}</div>
-        </div>
-        </section>
-        <section>
-        ${typeTeamMember}
-        </section>
-    </body>
-    </html>`;
-}
+//create card template to place each employee into and pass through teamMembers array
+const createCard = () => {
+  let cardStructure = "";
+  teamMembers.forEach((teamMember) => {
+    cardStructure += `<div class="card" style="width: 18rem;">
+  <div class="card-body">
+  <h5 class="card-title">${teamMember.getName()}</h5>
+  <h6 class="card-subtitle mb-2 text-muted">${teamMember.getRole()}</h6>
+  <div>Email: ${teamMember.getEmail()}</div>
+  <div>Office Number: ${teamMember.getofficeNumber()}</div>
+  <div>Employee ID: ${teamMember.getId()}</div>
 
-//then, write html file using: fs.writeFile("fileName", content). this brings all the data from the array to the HTML file.
-function writeFile(employeeData) {
-  fs.writeFile("./dist/index.html", showTeamRoster(employeeData), (err) =>
-    err ? console.log(err) : console.log("Success!")
-  );
-}
-
-//call functions
-createEachMember();
-showTeamRoster();
-writeFile();
+</div>
+</div>`;
+  });
+  return cardStructure;
+};
