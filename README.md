@@ -8,6 +8,8 @@ The Team Profile Generator is a helpful tool that generates a webpage that displ
 
 ## Link to Demo Walkthrough
 
+https://drive.google.com/file/d/1GgCt9_jDN1zw_AYDVX5a-lXipn1L1vny/view
+
 ## Links to Application
 
 - Here is the repo: [mayaatil/repo](https://github.com/mayaatil/Team-Profile-Generator)

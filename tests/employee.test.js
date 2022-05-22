@@ -18,8 +18,13 @@ test("get id", () => {
 
 //getOfficeNumber()
 test("get office number", () => {
-  const employee = new Employee("Maya", 12345, "mayatillman17@gmail.com");
-  expect(employee.getofficeNumber()).toBe(12345);
+  const employee = new Employee(
+    "Maya",
+    12345,
+    22222,
+    "mayatillman17@gmail.com"
+  );
+  expect(employee.getofficeNumber()).toBe(22222);
 });
 
 //getEmail()

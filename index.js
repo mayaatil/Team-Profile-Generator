@@ -92,7 +92,7 @@ function addEmployee() {
         teamMembers.push(intern);
 
         addEmployee();
-      } else if (response.title === "Finished") {
+      } else {
         createFile();
       }
     });
@@ -143,7 +143,7 @@ const createCard = () => {
   <h5 class="card-title">${teamMember.getName()}</h5>
   <h6 class="card-subtitle mb-2 text-muted">${teamMember.getRole()}</h6>
   <div>Email: ${teamMember.getEmail()}</div>
-  <div>Office Number: ${teamMember.getofficeNumber()}</div>
+ 
   <div>Employee ID: ${teamMember.getId()}</div>
 
 </div>
